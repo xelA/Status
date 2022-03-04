@@ -93,7 +93,7 @@ async def index_json():
     for g in database_xela_cache:
         try:
             del g["id"]
-        except ValueError:
+        except (ValueError, KeyError):
             pass  # idk how this fails, I fixed this from work with nano
         json_output["history"].append(g)
 
