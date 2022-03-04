@@ -73,8 +73,8 @@ class xelA:
 
     @property
     def avatar_url(self):
-        return "https://cdn.discordapp.com/avatars/{id}/{avatar}.{format}".format(
-            id=self.id, avatar=self.avatar, format="png"
+        return "https://cdn.discordapp.com/avatars/{id}/{avatar}.{format}?size={size}".format(
+            id=self.id, avatar=self.avatar, format="png", size=512
         )
 
     def _fetch(self):

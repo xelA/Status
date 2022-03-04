@@ -1,7 +1,9 @@
 # Custom
-database/*
-!database/.exists
+*.db
 config.json
+
+# Except
+!database/.exists
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

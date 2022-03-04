@@ -58,6 +58,7 @@ async def index():
     reverse_database_xela_cache = database_xela_cache[::-1]
     return await render_template(
         "index.html", bot=xelA,
+        domain=config.get("domain", f"http://localhost:{config['port']}"),
         top_stats={
             "WebSocket": f"{xelA.ping_ws:,} ms",
             "REST": f"{xelA.ping_rest:,} ms",

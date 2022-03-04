@@ -1,4 +1,5 @@
 {
   "port": 8080,
+  "domain": "https://status.xela.dev",
   "debug": false
 }
