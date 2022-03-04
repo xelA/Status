@@ -1,0 +1,26 @@
+.container { max-width: 800px; }
+.me .image-title { height: 6em; width: 6em; }
+.me .title { font-size: 3.5rem; }
+.me .undertitle {font-size: 1rem; }
+.box-container { margin-bottom: 1em; }
+
+.col-xs-4 {
+  margin: .5em 0;
+  padding: 0;
+}
+
+.stats-key, .stats-value {
+  margin: 0;
+  text-align: center;
+}
+
+.stats-key { font-weight: bold; }
+
+.footer-note {
+  margin: 2em 0;
+}
+
+.nice-flex {
+  font-style: italic;
+  text-decoration: line-through;
+}

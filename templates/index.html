@@ -1,0 +1,63 @@
+<html>
+  <head>
+    {% set title = "{} status".format(bot.username) %}
+    {% set desc = "See how {} is performing right now".format(bot.username) %}
+    {% set icon = bot.avatar_url %}
+    {% include "_head.html" %}
+  </head>
+  <body class="dark-theme github">
+    <div class="container">
+      <section class="me unset">
+        <img draggable="false" src="{{ bot.avatar_url }}" class="image-title">
+        <div class="unset">
+          <h1 class="title">{{ bot }}</h1>
+          <p class="undertitle italic">Last reboot: <span id="last_reboot"></span></p>
+          <script>
+            const lr = document.getElementById("last_reboot")
+            lr.innerText = unix_to_timestamp({{ bot.last_reboot }})
+          </script>
+        </div>
+      </section>
+
+      <div class="box-container sun-flower-dropshadow no-border-radius black-text">
+        <h1 class="no-margin black-text">
+          Bot: Statistics
+          <span class="nice-flex">aka. flexing</span>
+        </h1>
+        <section class="flex-grid">
+          {% for key, value in top_stats.items() %}
+          <div class="col-xs-4">
+            <p class="stats-key">{{ key }}</p>
+            <p class="stats-value">{{ value }}</p>
+          </div>
+          {% endfor %}
+        </section>
+      </div>
+
+      <div class="box-container secondary-dropshadow no-border-radius">
+        <h1 class="no-margin">Ping: Discord API</h1>
+        <canvas id="ping_chart"></canvas>
+        <script>
+          chart_maker(
+            'ping_chart', {{ lists.timestamps | safe }}, [
+              { label: 'WebSocket', data: {{ lists.ws | safe }}, color: 'rgb(46, 204, 113)' },
+              { label: 'REST', data: {{ lists.rest | safe }}, color: 'rgb(241, 196, 15)' }
+            ]
+          )
+        </script>
+      </div>
+
+      <p class="box-container emerald-dropshadow black-text no-margin">
+        Are you a nerd and want the <b>raw</b> JSON data of <b>{{ bot }}</b>?
+        Click <a href="/json" target="_blank" class="aqua-blue-text">here</a>.
+      </p>
+
+      <p class="footer-note">
+        <span class="bold sun-flower-text">NOTE: </span>
+        With this website, you can ensure that the bot is running smoothly,
+        and check if your internet connection is <i>shit</i> or Discord is drunk yet again.
+      </p>
+
+    </div>
+  </body>
+</html>
