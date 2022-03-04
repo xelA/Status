@@ -3,7 +3,7 @@ import asyncio
 import time
 
 from datetime import datetime
-from quart import Quart, render_template
+from quart import Quart, render_template, send_file
 from utils import default, sqlite
 
 with open("./config.json", "r") as f:
@@ -27,7 +27,7 @@ async def background_task():
                 "INSERT INTO ping (users, servers, avg_us, ping_ws, ping_rest) VALUES (?, ?, ?, ?, ?)",
                 (
                     xelA.users, xelA.servers, xelA.avg_users_server,
-                    xelA.ping.get("ws", 0), xelA.ping.get("rest", 0)
+                    xelA.ping_ws, xelA.ping_rest
                 )
             )
             global database_xela_cache
@@ -83,7 +83,15 @@ async def index():
     )
 
 
-@app.route("/json")
+@app.route("/stats.png")
+async def index_png():
+    return await send_file(
+        default.stats_image(xelA),
+        mimetype="image/png"
+    )
+
+
+@app.route("/data.json")
 async def index_json():
     json_output = {}
     json_output["history"] = []

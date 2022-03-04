@@ -1,5 +1,7 @@
 import requests
 
+from io import BytesIO
+from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime, timedelta
 
 
@@ -94,3 +96,34 @@ class xelA:
 
         self._last_fetch = datetime.utcnow()
         return (self._data, True)
+
+
+def font_loader(font: str, size: int):
+    return ImageFont.truetype(font, size)
+
+
+def stats_image(stats: xelA):
+    base = Image.new("RGBA", (800, 418), (24, 24, 24, 255))
+    font_name = "./static/fonts/snowstorm.ttf"
+    _primary = (255, 255, 255)
+    _secondary = (150, 150, 150)
+    _title = font_loader(font_name, 60)
+    _desc = font_loader(font_name, 48)
+
+    _stats_list = [
+        ("Users", f"{stats.users:,}"),
+        ("Servers", f"{stats.servers:,}"),
+        ("avg. users/servers", f"{stats.avg_users_server:,}"),
+    ]
+
+    d = ImageDraw.Draw(base)
+    for i, values in enumerate(_stats_list):
+        title, desc = values
+        jump = i * 140
+        d.text((20, 20 + jump), title, font=_title, fill=_primary)
+        d.text((60, 80 + jump), desc, font=_desc, fill=_secondary)
+
+    bio = BytesIO()
+    base.save(bio, "PNG")
+    bio.seek(0)
+    return bio
