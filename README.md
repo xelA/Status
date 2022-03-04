@@ -1,5 +1,5 @@
 # xeLA: Status page
-Check the current status to xelA and the Discord API
+Check the current status to xelA and the Discord API. Website to this source is https://status.xela.dev
 
 # Requirements
 - Python 3.6 or above
