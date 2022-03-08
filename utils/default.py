@@ -5,6 +5,21 @@ from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime, timedelta
 
 
+class DiscordStatus:
+    def __init__(self, _cache_seconds: int = 60):
+        self._data = {}
+        self._last_fetch = None
+        self._cache_seconds = _cache_seconds
+
+    def fetch(self):
+        if self._last_fetch and datetime.utcnow() - self._last_fetch < timedelta(seconds=self._cache_seconds):
+            return self._data
+
+        self._data = requests.get("https://discordstatus.com/api/v2/status.json").json()
+        self._last_fetch = datetime.utcnow()
+        return self._data
+
+
 class xelA:
     def __init__(self, _cache_seconds: int = 60):
         self._data = {}

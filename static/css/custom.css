@@ -17,7 +17,8 @@
 .stats-key { font-weight: bold; }
 
 .footer-note {
-  margin: 2em 0;
+  padding-top: 1em;
+  padding-bottom: 3em;
 }
 
 .nice-flex {

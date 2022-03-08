@@ -11,6 +11,7 @@ with open("./config.json", "r") as f:
 
 app = Quart(__name__)
 xelA = default.xelA()
+discordstatus = default.DiscordStatus()
 db = sqlite.Database()
 db.create_tables()
 
@@ -57,7 +58,7 @@ def unix_timestamp(timestamp):
 async def index():
     reverse_database_xela_cache = database_xela_cache[::-1]
     return await render_template(
-        "index.html", bot=xelA,
+        "index.html", bot=xelA, discordstatus=discordstatus.fetch(),
         domain=config.get("domain", f"http://localhost:{config['port']}"),
         top_stats={
             "WebSocket": f"{xelA.ping_ws:,} ms",
