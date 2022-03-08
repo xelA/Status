@@ -6,13 +6,13 @@ from datetime import datetime, timedelta
 
 
 class DiscordStatus:
-    def __init__(self, _cache_seconds: int = 60):
+    def __init__(self, _cache_minutes: int = 5):
         self._data = {}
         self._last_fetch = None
-        self._cache_seconds = _cache_seconds
+        self._cache_minutes = _cache_minutes
 
     def fetch(self):
-        if self._last_fetch and datetime.utcnow() - self._last_fetch < timedelta(seconds=self._cache_seconds):
+        if self._last_fetch and datetime.utcnow() - self._last_fetch < timedelta(minutes=self._cache_minutes):
             return self._data
 
         self._data = requests.get("https://discordstatus.com/api/v2/status.json").json()
