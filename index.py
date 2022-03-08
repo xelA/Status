@@ -1,5 +1,6 @@
 import json
 import asyncio
+import subprocess
 import time
 
 from datetime import datetime
@@ -14,6 +15,10 @@ xelA = default.xelA()
 discordstatus = default.DiscordStatus()
 db = sqlite.Database()
 db.create_tables()
+
+git_log = subprocess.getoutput('git log -1 --pretty=format:"%h %s" --abbrev-commit').split(" ")
+git_rev = git_log[0]
+git_commit = " ".join(git_log[1:])
 
 global database_xela_cache
 database_xela_cache = []
@@ -59,6 +64,7 @@ async def index():
     reverse_database_xela_cache = database_xela_cache[::-1]
     return await render_template(
         "index.html", bot=xelA, discordstatus=discordstatus.fetch(),
+        git_rev=git_rev, git_commit=git_commit,
         domain=config.get("domain", f"http://localhost:{config['port']}"),
         top_stats={
             "WebSocket": f"{xelA.ping_ws:,} ms",

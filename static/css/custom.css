@@ -15,10 +15,16 @@
 }
 
 .stats-key { font-weight: bold; }
+.git-revision {
+  text-align: right;
+  width: 100%;
+  margin: 0;
+  padding-bottom: 2em;
+}
 
 .footer-note {
   padding-top: 1em;
-  padding-bottom: 3em;
+  padding-bottom: 2em;
 }
 
 .nice-flex {
