@@ -51,5 +51,9 @@ function chart_maker(name, labels, data, {beginAtZero=true} = {}) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  // PLACEHOLDER
+  let timestamps = document.getElementsByClassName("timestamp")
+  for (var i = 0; i < timestamps.length; i++) {
+    let converted_date = unix_to_timestamp(timestamps[i].innerText)
+    timestamps[i].innerText = converted_date
+  }
 })

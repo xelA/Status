@@ -9,6 +9,49 @@
   padding: 0;
 }
 
+.discord-timestamp {
+  border-radius: 3px;
+  padding: 0 4px;
+  position: relative;
+  background-color: rgba(79, 84, 92, 0.48);
+}
+
+@keyframes timestamp-fade-in {
+  from { opacity: 0; transform: translateY(0) translate(-50%, -50%); }
+  to { opacity: 1; transform: translateY(-1.25em) translate(-50%, -50%); }
+}
+
+.discord-timestamp::before {
+  content: "⌛ This timestamp is local to yours.";
+  background-color: #000;
+  margin-right: 4px;
+  padding: .25em .5em;
+  border-radius: 4px;
+  left: 50%;
+  width: max-content;
+  top: 0;
+  display: none;
+  position: absolute;
+  animation: timestamp-fade-in 200ms ease-in-out;
+  animation-fill-mode: forwards;
+}
+
+.discord-mention {
+  border-radius: 3px;
+  padding: 0 4px;
+  background-color: rgba(88, 101, 242, .3);
+}
+
+.discord-mention:hover {
+  background-color: rgba(88, 101, 242, .75);
+  cursor: default;
+}
+
+.discord-timestamp:hover::before {
+  cursor: default;
+  display: block;
+}
+
 .stats-key, .stats-value {
   margin: 0;
   text-align: center;

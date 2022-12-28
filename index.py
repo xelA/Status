@@ -2,6 +2,7 @@ import json
 import asyncio
 import subprocess
 import time
+import aiohttp
 
 from datetime import datetime
 from quart import Quart, render_template, send_file
@@ -20,12 +21,11 @@ git_log = subprocess.getoutput('git log -1 --pretty=format:"%h %s" --abbrev-comm
 git_rev = git_log[0]
 git_commit = " ".join(git_log[1:])
 
-global database_xela_cache
 database_xela_cache = []
+commands_cache = []
 
 
-async def background_task():
-    """ Delete old ticket entries for privacy reasons """
+async def _task_refresh_db_cache():
     while True:
         data, updated = xelA._fetch()
         if updated:
@@ -41,9 +41,21 @@ async def background_task():
         await asyncio.sleep(5)
 
 
+async def _task_refresh_cmd_cache():
+    while True:
+        global commands_cache
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://127.0.0.1:13377/commands/stats") as r:
+                commands_cache = await r.json()
+
+        await asyncio.sleep(30)
+
+
 @app.before_serving
 async def startup():
-    app.background_task = asyncio.ensure_future(background_task())
+    app.add_background_task(_task_refresh_db_cache)
+    app.add_background_task(_task_refresh_cmd_cache)
 
 
 def str_datetime(timestamp: str):
@@ -64,8 +76,12 @@ async def index():
     reverse_database_xela_cache = database_xela_cache[::-1]
     return await render_template(
         "index.html", bot=xelA, discordstatus=discordstatus.fetch(),
-        git_rev=git_rev, git_commit=git_commit,
         domain=config.get("domain", f"http://localhost:{config['port']}"),
+        git_rev=git_rev, git_commit=git_commit,
+        commands=[
+            {"name": g["name"], "count": g["count"], "used": g["last_used_at"]}
+            for g in commands_cache[:15]
+        ],
         top_stats={
             "WebSocket": f"{xelA.ping_ws:,} ms",
             "REST": f"{xelA.ping_rest:,} ms",
@@ -101,11 +117,11 @@ async def index_png():
 @app.route("/data.json")
 async def index_json():
     json_output = {}
-    json_output["history"] = []
 
     for k, v in xelA.__dict__.items():
         json_output[k] = v
 
+    json_output["history"] = []
     for g in database_xela_cache:
         try:
             del g["id"]
@@ -113,7 +129,10 @@ async def index_json():
             pass  # idk how this fails, I fixed this from work with nano
         json_output["history"].append(g)
 
+    json_output["commands"] = commands_cache
+
     return json_output
 
 
+app.config["JSON_SORT_KEYS"] = False
 app.run(port=config["port"], debug=config["debug"])

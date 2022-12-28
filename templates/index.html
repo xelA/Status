@@ -57,6 +57,28 @@
         </script>
       </div>
 
+      <div class="box-container secondary-dropshadow no-border-radius">
+        <h1 class="no-margin">Command stats</h1>
+        <table width="100%" class="text-center">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Times used</th>
+              <th>Last used</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cmd in commands %}
+            <tr>
+              <td><span class="discord-mention">/{{ cmd.name }}</span></td>
+              <td>{{ cmd.count }}</td>
+              <td><span class="discord-timestamp"><span class="timestamp">{{ cmd.used }}</span></span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
       <p class="box-container emerald-dropshadow black-text no-margin">
         Are you a nerd and want the <b>raw</b> JSON data of <b>{{ bot }}</b>?
         Click <a href="/data.json" target="_blank" class="peter-river-text">here</a>.
