@@ -80,7 +80,7 @@ async def index():
         git_rev=git_rev, git_commit=git_commit,
         commands=[
             {"name": g["name"], "count": g["count"], "used": g["last_used_at"]}
-            for g in commands_cache[:15]
+            for g in commands_cache[:10]
         ],
         top_stats={
             "WebSocket": f"{xelA.ping_ws:,} ms",
