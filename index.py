@@ -2,7 +2,6 @@ import json
 import asyncio
 import subprocess
 import time
-import aiohttp
 
 from datetime import datetime
 from quart import Quart, render_template, send_file
@@ -22,7 +21,6 @@ git_rev = git_log[0]
 git_commit = " ".join(git_log[1:])
 
 database_xela_cache = []
-commands_cache = []
 
 
 async def _task_refresh_db_cache():
@@ -41,21 +39,9 @@ async def _task_refresh_db_cache():
         await asyncio.sleep(5)
 
 
-async def _task_refresh_cmd_cache():
-    while True:
-        global commands_cache
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get("http://127.0.0.1:13377/commands/stats") as r:
-                commands_cache = await r.json()
-
-        await asyncio.sleep(30)
-
-
 @app.before_serving
 async def startup():
     app.add_background_task(_task_refresh_db_cache)
-    app.add_background_task(_task_refresh_cmd_cache)
 
 
 def str_datetime(timestamp: str):
@@ -78,10 +64,6 @@ async def index():
         "index.html", bot=xelA, discordstatus=discordstatus.fetch(),
         domain=config.get("domain", f"http://localhost:{config['port']}"),
         git_rev=git_rev, git_commit=git_commit,
-        commands=[
-            {"name": g["name"], "count": g["count"], "used": g["last_used_at"]}
-            for g in commands_cache[:10]
-        ],
         top_stats={
             "WebSocket": f"{xelA.ping_ws:,} ms",
             "REST": f"{xelA.ping_rest:,} ms",
@@ -128,8 +110,6 @@ async def index_json():
         except (ValueError, KeyError):
             pass  # idk how this fails, I fixed this from work with nano
         json_output["history"].append(g)
-
-    json_output["commands"] = commands_cache
 
     return json_output
 
