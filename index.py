@@ -35,7 +35,7 @@ async def _task_refresh_db_cache():
                 )
             )
             global database_xela_cache
-            database_xela_cache = db.fetch("SELECT * FROM ping ORDER BY created_at DESC LIMIT 10")
+            database_xela_cache = db.fetch("SELECT * FROM ping ORDER BY created_at DESC LIMIT 25")
         await asyncio.sleep(5)
 
 
