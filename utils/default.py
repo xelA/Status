@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 
 class DiscordStatus:
-    def __init__(self, _cache_minutes: int = 5):
+    def __init__(self, _cache_minutes: int = 2):
         self._data = {}
         self._last_fetch = None
         self._cache_minutes = _cache_minutes
