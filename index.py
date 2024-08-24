@@ -3,9 +3,12 @@ import asyncio
 import subprocess
 import time
 
+from typing import Union
 from datetime import datetime
-from quart import Quart, render_template, send_file
-from utils import default, sqlite
+from postgreslite import PostgresLite
+from quart import Quart, render_template
+
+from utils import default
 
 with open("./config.json", "r") as f:
     config = json.load(f)
@@ -13,26 +16,25 @@ with open("./config.json", "r") as f:
 app = Quart(__name__)
 xelA = default.xelA()
 discordstatus = default.DiscordStatus()
-db = sqlite.Database()
-db.create_tables()
+
+db = PostgresLite("./storage.db").connect()
 
 git_log = subprocess.getoutput('git log -1 --pretty=format:"%h %s" --abbrev-commit').split(" ")
 git_rev = git_log[0]
 git_commit = " ".join(git_log[1:])
 
-database_xela_cache = []
+database_xela_cache: list[dict] = []
 
 
 async def _task_refresh_db_cache():
     while True:
-        data, updated = xelA._fetch()
+        _, updated = xelA._fetch()
         if updated:
             db.execute(
-                "INSERT INTO ping (users, servers, avg_us, ping_ws, ping_rest) VALUES (?, ?, ?, ?, ?)",
-                (
-                    xelA.users, xelA.servers, xelA.avg_users_server,
-                    xelA.ping_ws, xelA.ping_rest
-                )
+                "INSERT INTO ping (users, servers, user_installs, avg_us, ping_ws, ping_rest) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                xelA.users, xelA.servers, xelA.user_installs,
+                xelA.avg_users_server, xelA.ping_ws, xelA.ping_rest
             )
             global database_xela_cache
             database_xela_cache = db.fetch("SELECT * FROM ping ORDER BY created_at DESC LIMIT 25")
@@ -44,11 +46,11 @@ async def startup():
     app.add_background_task(_task_refresh_db_cache)
 
 
-def str_datetime(timestamp: str):
+def str_datetime(timestamp: str) -> datetime:
     return datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
 
-def unix_timestamp(timestamp):
+def unix_timestamp(timestamp: Union[str, datetime]) -> int:
     if isinstance(timestamp, str):
         return time.mktime(str_datetime(timestamp).timetuple())
     elif isinstance(timestamp, datetime):
@@ -61,14 +63,17 @@ def unix_timestamp(timestamp):
 async def index():
     reverse_database_xela_cache = database_xela_cache[::-1]
     return await render_template(
-        "index.html", bot=xelA, discordstatus=discordstatus.fetch(),
+        "index.html",
+        bot=xelA,
+        discordstatus=discordstatus.fetch(),
         domain=config.get("domain", f"http://localhost:{config['port']}"),
-        git_rev=git_rev, git_commit=git_commit,
+        git_rev=git_rev,
+        git_commit=git_commit,
         top_stats={
-            "WebSocket": f"{xelA.ping_ws:,} ms",
-            "REST": f"{xelA.ping_rest:,} ms",
-            "Users": f"{xelA.users:,}",
-            "Servers": f"{xelA.servers:,}",
+            "WS / REST": f"{xelA.ping_ws:,} ms / {xelA.ping_rest:,} ms",
+            "Viewable users": f"{xelA.users:,}",
+            "Server Installs": f"{xelA.servers:,}",
+            "User Installs": f"{xelA.user_installs:,}",
             "RAM": xelA.ram,
             "DB entries": f"{xelA.database:,}"
         },
@@ -85,14 +90,6 @@ async def index():
                 for g in reverse_database_xela_cache
             ],
         }
-    )
-
-
-@app.route("/stats.png")
-async def index_png():
-    return await send_file(
-        default.stats_image(xelA),
-        mimetype="image/png"
     )
 
 

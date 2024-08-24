@@ -1,8 +1,6 @@
 import requests
 
-from io import BytesIO
-from PIL import Image, ImageFont, ImageDraw
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 
 class DiscordStatus:
@@ -11,12 +9,15 @@ class DiscordStatus:
         self._last_fetch = None
         self._cache_minutes = _cache_minutes
 
-    def fetch(self):
-        if self._last_fetch and datetime.utcnow() - self._last_fetch < timedelta(minutes=self._cache_minutes):
+    def fetch(self) -> dict:
+        if (
+            self._last_fetch and
+            datetime.now(UTC) - self._last_fetch < timedelta(minutes=self._cache_minutes)
+        ):
             return self._data
 
         self._data = requests.get("https://discordstatus.com/api/v2/status.json").json()
-        self._last_fetch = datetime.utcnow()
+        self._last_fetch = datetime.now(UTC)
         return self._data
 
 
@@ -26,77 +27,84 @@ class xelA:
         self._last_fetch = None
         self._cache_seconds = _cache_seconds
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.username}#{self.discriminator}"
 
-    def __int__(self):
+    def __int__(self) -> int:
         return int(self.id)
 
     @property
-    def me(self):
+    def me(self) -> dict:
         return self._data.get("@me", {})
 
     @property
-    def last_reboot(self):
+    def last_reboot(self) -> int:
         return self._data.get("last_reboot", 0)
 
     @property
-    def ram(self):
+    def ram(self) -> int:
         return self._data.get("ram", 0)
 
     @property
-    def database(self):
+    def database(self) -> int:
         return self._data.get("database", 0)
 
     @property
-    def servers(self):
+    def servers(self) -> int:
         return self._data.get("servers", 0)
 
     @property
-    def users(self):
+    def user_installs(self) -> int:
+        return self._data.get("user_installs", 0)
+
+    @property
+    def users(self) -> int:
         return self._data.get("users", 0)
 
     @property
-    def avg_users_server(self):
+    def avg_users_server(self) -> int:
         return self._data.get("avg_users_server", 0)
 
     @property
-    def ping(self):
+    def ping(self) -> dict:
         return self._data.get("ping", {})
 
     @property
-    def ping_ws(self):
+    def ping_ws(self) -> int:
         return self.ping.get("ws", 0)
 
     @property
-    def ping_rest(self):
+    def ping_rest(self) -> int:
         return self.ping.get("rest", 0)
 
     @property
-    def id(self):
+    def id(self) -> int:
         return self.me.get("id", 1337)
 
     @property
-    def avatar(self):
+    def avatar(self) -> str:
         return self.me.get("avatar", "")
 
     @property
-    def discriminator(self):
+    def discriminator(self) -> str:
         return self.me.get("discriminator", "0000")
 
     @property
-    def username(self):
+    def username(self) -> str:
         return self.me.get("username", "NotFound")
 
     @property
-    def avatar_url(self):
+    def avatar_url(self) -> str:
         return "https://cdn.discordapp.com/avatars/{id}/{avatar}.{format}?size={size}".format(
             id=self.id, avatar=self.avatar, format="png", size=512
         )
 
-    def _fetch(self):
+    def _fetch(self) -> tuple[dict, bool]:
         """ Fetch data from the bot API (False = cache, True = fetch) """
-        if self._last_fetch and datetime.utcnow() - self._last_fetch < timedelta(seconds=self._cache_seconds):
+        if (
+            self._last_fetch and
+            datetime.now(UTC) - self._last_fetch < timedelta(seconds=self._cache_seconds)
+        ):
             return (self._data, False)
 
         try:
@@ -109,36 +117,5 @@ class xelA:
             self._data = new_fake_data
             del new_fake_data
 
-        self._last_fetch = datetime.utcnow()
+        self._last_fetch = datetime.now(UTC)
         return (self._data, True)
-
-
-def font_loader(font: str, size: int):
-    return ImageFont.truetype(font, size)
-
-
-def stats_image(stats: xelA):
-    base = Image.new("RGBA", (800, 418), (24, 24, 24, 255))
-    font_name = "./static/fonts/snowstorm.ttf"
-    _primary = (255, 255, 255)
-    _secondary = (150, 150, 150)
-    _title = font_loader(font_name, 60)
-    _desc = font_loader(font_name, 48)
-
-    _stats_list = [
-        ("Users", f"{stats.users:,}"),
-        ("Servers", f"{stats.servers:,}"),
-        ("avg. users/servers", f"{stats.avg_users_server:,}"),
-    ]
-
-    d = ImageDraw.Draw(base)
-    for i, values in enumerate(_stats_list):
-        title, desc = values
-        jump = i * 140
-        d.text((20, 20 + jump), title, font=_title, fill=_primary)
-        d.text((60, 80 + jump), desc, font=_desc, fill=_secondary)
-
-    bio = BytesIO()
-    base.save(bio, "PNG")
-    bio.seek(0)
-    return bio
