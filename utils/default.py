@@ -1,6 +1,6 @@
 import requests
 
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta
 
 
 class DiscordStatus:
@@ -12,12 +12,12 @@ class DiscordStatus:
     def fetch(self) -> dict:
         if (
             self._last_fetch and
-            datetime.now(UTC) - self._last_fetch < timedelta(minutes=self._cache_minutes)
+            datetime.utcnow() - self._last_fetch < timedelta(minutes=self._cache_minutes)
         ):
             return self._data
 
         self._data = requests.get("https://discordstatus.com/api/v2/status.json").json()
-        self._last_fetch = datetime.now(UTC)
+        self._last_fetch = datetime.utcnow()
         return self._data
 
 
@@ -103,7 +103,7 @@ class xelA:
         """ Fetch data from the bot API (False = cache, True = fetch) """
         if (
             self._last_fetch and
-            datetime.now(UTC) - self._last_fetch < timedelta(seconds=self._cache_seconds)
+            datetime.utcnow() - self._last_fetch < timedelta(seconds=self._cache_seconds)
         ):
             return (self._data, False)
 
@@ -117,5 +117,5 @@ class xelA:
             self._data = new_fake_data
             del new_fake_data
 
-        self._last_fetch = datetime.now(UTC)
+        self._last_fetch = datetime.utcnow()
         return (self._data, True)
