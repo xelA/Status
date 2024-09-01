@@ -71,11 +71,11 @@ async def index():
         git_commit=git_commit,
         top_stats={
             "WS / REST": f"{xelA.ping_ws:,} ms / {xelA.ping_rest:,} ms",
-            "Viewable users": f"{xelA.users:,}",
+            "RAM": xelA.ram,
+            "DB entries": f"{xelA.database:,}",
             "Server Installs": f"{xelA.servers:,}",
             "User Installs": f"{xelA.user_installs:,}",
-            "RAM": xelA.ram,
-            "DB entries": f"{xelA.database:,}"
+            "Viewable users": f"{xelA.users:,}",
         },
         data=database_xela_cache,
         data_count=len(database_xela_cache),
